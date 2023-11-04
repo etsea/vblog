@@ -16,7 +16,7 @@ fn main() {
 	mut add_cmd := Command{
 		name: 'add'
 		description: 'Add a new article'
-		usage: '[title] [content]'
+		usage: '[title] [content] [author]'
 		required_args: 2
 		execute: add_func
 	}
@@ -40,7 +40,8 @@ fn main() {
 fn add_func(cmd Command) ! {
 	new_title := cmd.args[0]
 	new_content := cmd.args[1]
-	blog.add_article(new_title, new_content) or { panic(err) }
+	new_author := cmd.args[2]
+	blog.add_article(new_title, new_content, new_author) or { panic(err) }
 }
 
 fn serve_func(cmd Command) ! {

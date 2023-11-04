@@ -29,3 +29,13 @@ pub fn return_blog_avatar() string {
 	content := $embed_file('blog_avatar.bmp')
 	return content.to_string()
 }
+
+pub fn return_base_font() string {
+	content := $embed_file('cabin.ttf')
+	return content.to_string()
+}
+
+pub fn return_italic_font() string {
+	content := $embed_file('cabin_italic.ttf')
+	return content.to_string()
+}
