@@ -70,7 +70,7 @@ pub fn generate_front_page() string {
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
 		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		html_body += '        <article><h1>${article.vals[0]}</h1><p class="date">${formatted_time}; <span class="author">posted by ${article.vals[3]}</span></p><p>${article.vals[2]}</p><img src="avatar.bmp" alt="Avatar" class="avatar"></article>\n'
+		html_body += '        <article><h1>${article.vals[0]}</h1><p class="date">${formatted_time} <span class="author">posted by ${article.vals[3]}</span></p><p>${article.vals[2]}</p><img src="avatar.bmp" alt="Avatar" class="avatar"></article>\n'
 	}
 	html_template_tail := if ! truncate_page { static_data.return_main_page_tail() } else { static_data.return_truncated_tail() }
 
@@ -86,7 +86,7 @@ pub fn generate_main_page() string {
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
 		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		html_body += '        <article><h1>${article.vals[0]}</h1><p class="date">${formatted_time}; <span class="author">posted by ${article.vals[3]}</span></p><p>${article.vals[2]}</p><img src="avatar.bmp" alt="Avatar" class="avatar"></article>\n'
+		html_body += '        <article><h1>${article.vals[0]}</h1><p class="date">${formatted_time} <span class="author">posted by ${article.vals[3]}</span></p><p>${article.vals[2]}</p><img src="avatar.bmp" alt="Avatar" class="avatar"></article>\n'
 	}
 	html_template_tail := static_data.return_main_page_tail()
 

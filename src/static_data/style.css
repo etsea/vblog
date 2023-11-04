@@ -161,3 +161,20 @@ footer a:hover {
         display: none;
     }
 }
+
+@media (hover: none) and (pointer: coarse) {
+    article:active {
+        background-color: #b4637a;
+        color: #f2e9e1;
+    }
+
+    article:active img.avatar {
+        filter: grayscale(0%);
+        transition: filter 0.5s ease;
+    }
+
+    article:active .author {
+        color: #f4ede8;
+    }
+}
+
