@@ -13,7 +13,6 @@ const (
 pub struct BlogHandler {}
 
 fn (h BlogHandler) handle(req Request) Response {
-	println(req)
 	file_data := static_data.get_file(req.url)
 	response := match file_data.page_type {
 		.homepage {
