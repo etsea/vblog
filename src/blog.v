@@ -6,6 +6,10 @@ import db.sqlite
 import time
 import os
 
+const (
+	blog_title = "Blog in V"
+)
+
 pub struct BlogHandler {}
 
 fn (h BlogHandler) handle(req Request) Response {
@@ -61,7 +65,7 @@ fn create_or_open_db() !sqlite.DB {
 
 pub fn generate_front_page() string {
 	page_title := 'Recent Posts'
-	html_template_head := static_data.return_main_page_head().replace('PAGETITLE', page_title)
+	html_template_head := static_data.return_main_page_head().replace('BLOGTITLE', blog_title).replace('PAGETITLE', page_title)
 	article_db := create_or_open_db() or { panic(err) }
 	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
 	mut html_body := ''
@@ -79,7 +83,7 @@ pub fn generate_front_page() string {
 
 pub fn generate_main_page() string {
 	page_title := 'All Posts'
-	html_template_head := static_data.return_main_page_head().replace('PAGETITLE', page_title)
+	html_template_head := static_data.return_main_page_head().replace('BLOGTITLE', blog_title).replace('PAGETITLE', page_title)
 	article_db := create_or_open_db() or { panic(err) }
 	articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
 	mut html_body := ''
