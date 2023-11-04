@@ -13,40 +13,21 @@ const (
 pub struct BlogHandler {}
 
 fn (h BlogHandler) handle(req Request) Response {
-	mut status_code := 200
-	mut content_type := 'text/html'
-	response := match req.url {
-		'/' {
-			blog.generate_front_page()
+	file_data := static_data.get_file(req.url)
+	response := match file_data.page_type {
+		.homepage {
+			generate_home_page('Blog In V', 'Home Page', file_data)
 		}
-		'/all' {
-			blog.generate_main_page()
+		.allposts {
+			generate_all_posts('Blog In V', 'All Posts', file_data)
 		}
-		'/style.css' {
-			content_type = 'text/css'
-			static_data.return_stylesheet()
-		}
-		'/avatar.bmp' {
-			content_type = 'image/bmp'
-			static_data.return_blog_avatar()
-		}
-		'/cabin.ttf' {
-			content_type = 'font/ttf'
-			static_data.return_base_font()
-		}
-		'/cabin_italic.ttf' {
-			content_type = 'font/ttf'
-			static_data.return_italic_font()
-		}
-		else {
-			status_code = 404
-			static_data.return_error_page()
-		}
+		else { file_data.content }
 	}
+
 	mut res := Response{
-		status_code: status_code
+		status_code: file_data.status
 		header: http.new_header_from_map({
-			CommonHeader.content_type: content_type
+			CommonHeader.content_type: file_data.content_type.str()
 		})
 		body: response
 	}
@@ -63,38 +44,70 @@ fn create_or_open_db() !sqlite.DB {
 	return db
 }
 
-pub fn generate_front_page() string {
-	page_title := 'Recent Posts'
-	html_template_head := static_data.return_main_page_head().replace('BLOGTITLE', blog_title).replace('PAGETITLE', page_title)
+pub fn generate_home_page(blog_title string, page_title string, file_data static_data.FileData) string {
+	mut content := file_data.content
+	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', page_title)
+
 	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
-	mut html_body := ''
-	truncate_page := if articles.len > 10 { true } else { false }
-	if truncate_page { articles.trim(10) }
+	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc limit 10;") or { panic(err) }
+	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
 		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		html_body += '        <article><h1>${article.vals[0]}</h1><p class="date">${formatted_time} <span class="author">posted by ${article.vals[3]}</span></p><p>${article.vals[2]}</p><img src="avatar.bmp" alt="Avatar" class="avatar"></article>\n'
-	}
-	html_template_tail := if ! truncate_page { static_data.return_main_page_tail() } else { static_data.return_truncated_tail() }
+		article_title := article.vals[0]
+		article_author := article.vals[3]
+		article_content := article.vals[2]
 
-	return html_template_head + html_body + html_template_tail
+		articles_body += ' '.repeat(8)
+		articles_body += '<article>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<h1>${article_title}</h1>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<p>${article_content}</p>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
+		articles_body += ' '.repeat(8)
+		articles_body += '</article>\n'
+	}
+
+	content = content.replace('@POSTS', articles_body)
+
+	return content
 }
 
-pub fn generate_main_page() string {
-	page_title := 'All Posts'
-	html_template_head := static_data.return_main_page_head().replace('BLOGTITLE', blog_title).replace('PAGETITLE', page_title)
+pub fn generate_all_posts(blog_title string, page_title string, file_data static_data.FileData) string {
+	mut content := file_data.content
+	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', page_title)
+
 	article_db := create_or_open_db() or { panic(err) }
-	articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
-	mut html_body := ''
+	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
+	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
 		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		html_body += '        <article><h1>${article.vals[0]}</h1><p class="date">${formatted_time} <span class="author">posted by ${article.vals[3]}</span></p><p>${article.vals[2]}</p><img src="avatar.bmp" alt="Avatar" class="avatar"></article>\n'
-	}
-	html_template_tail := static_data.return_main_page_tail()
+		article_title := article.vals[0]
+		article_author := article.vals[3]
+		article_content := article.vals[2]
 
-	return html_template_head + html_body + html_template_tail
+		articles_body += ' '.repeat(8)
+		articles_body += '<article>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<h1>${article_title}</h1>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<p>${article_content}</p>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
+		articles_body += ' '.repeat(8)
+		articles_body += '</article>\n'
+	}
+
+	content = content.replace('@POSTS', articles_body)
+
+	return content
 }
 
 pub fn add_article(title string, content string, author string) ! {
