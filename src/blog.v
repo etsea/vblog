@@ -16,10 +16,10 @@ fn (h BlogHandler) handle(req Request) Response {
 	file_data := static_data.get_file(req.url)
 	response := match file_data.page_type {
 		.homepage {
-			generate_home_page('Blog In V', 'Home Page', file_data)
+			generate_home_page(file_data)
 		}
 		.allposts {
-			generate_all_posts('Blog In V', 'All Posts', file_data)
+			generate_all_posts(file_data)
 		}
 		else { file_data.content }
 	}
@@ -44,9 +44,9 @@ fn create_or_open_db() !sqlite.DB {
 	return db
 }
 
-pub fn generate_home_page(blog_title string, page_title string, file_data static_data.FileData) string {
+pub fn generate_home_page(file_data static_data.FileData) string {
 	mut content := file_data.content
-	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', page_title)
+	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	article_db := create_or_open_db() or { panic(err) }
 	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc limit 10;") or { panic(err) }
@@ -77,9 +77,9 @@ pub fn generate_home_page(blog_title string, page_title string, file_data static
 	return content
 }
 
-pub fn generate_all_posts(blog_title string, page_title string, file_data static_data.FileData) string {
+pub fn generate_all_posts(file_data static_data.FileData) string {
 	mut content := file_data.content
-	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', page_title)
+	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	article_db := create_or_open_db() or { panic(err) }
 	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
