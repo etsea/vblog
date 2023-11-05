@@ -104,6 +104,19 @@ article h2 {
     margin-right: 80px;
     color: #b4637a;
 }
+article:hover a.title, article:hover h2 {
+    color: #f2e9e1;
+}
+
+a.title, a.title:visited {
+    color: #b4637a;
+    text-decoration: none;
+}
+
+a.title:hover {
+    color: #f2e9e1;
+    text-decoration: underline;
+}
 
 p.date {
     position: relative;

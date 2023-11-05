@@ -12,6 +12,7 @@ enum ContentType {
 pub enum PageType {
 	homepage
 	allposts
+	postpage
 	other
 }
 
@@ -92,6 +93,13 @@ const (
 				content_type: .font_ttf
 				status: 200
 				content: $embed_file('files/cabin_italic.ttf').to_string()
+			}
+			'/post': FileData{
+				page_type: .postpage
+				title: '@POSTPAGE'
+				content_type: .text_html
+				status: 200
+				content: $embed_file('files/postpage.html').to_string()
 			}
 		}
 )

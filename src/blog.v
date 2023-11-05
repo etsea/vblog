@@ -5,6 +5,7 @@ import net.http { CommonHeader, Request, Response, Server }
 import db.sqlite
 import time
 import os
+import regex
 
 const (
 	blog_title = "Blog in V"
@@ -19,15 +20,43 @@ fn log_request(req Request) {
 	println('\t[${header_host}] -> ${req.host}${req.url}')
 }
 
+fn check_if_post(url string) bool {
+	url_query := '^/post\\d+$'
+	re := regex.regex_opt(url_query) or { panic(err) }
+	return if re.matches_string(url) { true } else { false }
+}
+
+fn get_post_id(url string) int {
+	id_string := url[5..]
+	id := id_string.int()
+	return id
+}
+
+fn check_if_in_db(id int) bool {
+	article_db := create_or_open_db() or { panic(err) }
+	exists := article_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
+	return if exists[0].vals[0] == '1' { true } else { false }
+}
+
 fn (h BlogHandler) handle(req Request) Response {
+	is_post := check_if_post(req.url)
+	mut fetch_url := if is_post { '/post' } else { req.url }
+	post_id := if is_post { get_post_id(req.url) } else { 0 }
+	if is_post {
+		fetch_url = if check_if_in_db(post_id) { fetch_url } else { '/404' }
+	}
+
 	log_request(req)
-	file_data := static_data.get_file(req.url)
+	file_data := static_data.get_file(fetch_url)
 	response := match file_data.page_type {
 		.homepage {
 			generate_home_page(file_data)
 		}
 		.allposts {
 			generate_all_posts(file_data)
+		}
+		.postpage {
+			generate_post_page(file_data, post_id)
 		}
 		else { file_data.content }
 	}
@@ -57,7 +86,7 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc limit 10;") or { panic(err) }
+	mut articles := article_db.exec("select title, time_date, content, author, id from articles order by id desc limit 10;") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -65,11 +94,12 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 		article_title := article.vals[0]
 		article_author := article.vals[3]
 		article_content := article.vals[2]
+		post_id := article.vals[4]
 
 		articles_body += ' '.repeat(8)
 		articles_body += '<article>\n'
 		articles_body += ' '.repeat(12)
-		articles_body += '<h1>${article_title}</h1>\n'
+		articles_body += '<h2><a class="title" href="/post${post_id}">${article_title}</a></h2>\n'
 		articles_body += ' '.repeat(12)
 		articles_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
 		articles_body += ' '.repeat(12)
@@ -90,7 +120,7 @@ pub fn generate_all_posts(file_data static_data.FileData) string {
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, content, author from articles order by id desc;") or { panic(err) }
+	mut articles := article_db.exec("select title, time_date, content, author, id from articles order by id desc;") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -98,11 +128,12 @@ pub fn generate_all_posts(file_data static_data.FileData) string {
 		article_title := article.vals[0]
 		article_author := article.vals[3]
 		article_content := article.vals[2]
+		post_id := article.vals[4]
 
 		articles_body += ' '.repeat(8)
 		articles_body += '<article>\n'
 		articles_body += ' '.repeat(12)
-		articles_body += '<h1>${article_title}</h1>\n'
+		articles_body += '<h2><a class="title" href="/post${post_id}">${article_title}</a></h2>\n'
 		articles_body += ' '.repeat(12)
 		articles_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
 		articles_body += ' '.repeat(12)
@@ -114,6 +145,40 @@ pub fn generate_all_posts(file_data static_data.FileData) string {
 	}
 
 	content = content.replace('@POSTS', articles_body)
+
+	return content
+}
+
+pub fn generate_post_page(file_data static_data.FileData, post_id int) string {
+	mut content := file_data.content
+	content = content.replace('@BLOGTITLE', blog_title)
+
+	article_db := create_or_open_db() or { panic(err) }
+	mut articles := article_db.exec("select title, time_date, content, author from articles where id = ${post_id};") or { panic(err) }
+	mut articles_body := ''
+	for article in articles {
+		article_time := time.parse(article.vals[1]) or { panic(err) }
+		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
+		article_title := article.vals[0]
+		article_author := article.vals[3]
+		article_content := article.vals[2]
+
+		articles_body += ' '.repeat(8)
+		articles_body += '<article>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<h2>${article_title}</h2>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<p>${article_content}</p>\n'
+		articles_body += ' '.repeat(12)
+		articles_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
+		articles_body += ' '.repeat(8)
+		articles_body += '</article>\n'
+		content = content.replace('@POSTNAME', article_title)
+	}
+
+	content = content.replace('@POSTCONTENT', articles_body)
 
 	return content
 }
