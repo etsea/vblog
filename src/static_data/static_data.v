@@ -5,6 +5,7 @@ enum ContentType {
 	text_plain
 	text_css
 	image_bmp
+	image_vnd
 	font_ttf
 }
 
@@ -28,6 +29,7 @@ pub fn (ct ContentType) str() string {
 		.text_html { 'text/html' }
 		.text_css { 'text/css' }
 		.image_bmp { 'image/bmp' }
+		.image_vnd { 'image/vnd' }
 		.font_ttf { 'font/ttf' }
 		else { 'text/plain' }
 	}
@@ -46,6 +48,7 @@ fn new_file_data(page_type PageType, title string, content_type ContentType, sta
 const (
 	files = {
 		'/': new_file_data(.homepage, 'Home Page', .text_html, 200, $embed_file('files/homepage.html').to_string())
+		'/favicon.ico': new_file_data(.other, 'Favicon', .image_vnd, 200, $embed_file('files/favicon.ico').to_string())
 		'/404': new_file_data(.other, '404 Not Found', .text_html, 404, $embed_file('files/404_error.html').to_string())
 		'/style.css': new_file_data(.other, 'CSS Stylesheet', .text_css, 200, $embed_file('files/style.css').to_string())
 		'/all': new_file_data(.allposts, 'All Posts', .text_html, 200, $embed_file('files/allposts.html').to_string())
