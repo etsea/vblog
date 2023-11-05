@@ -56,7 +56,7 @@ fn (h BlogHandler) handle(req Request) Response {
 			generate_all_posts(file_data)
 		}
 		.postpage {
-			generate_post_page(file_data, post_id)
+			generate_post_page(file_data, post_id, req.host)
 		}
 		else { file_data.content }
 	}
@@ -149,9 +149,11 @@ pub fn generate_all_posts(file_data static_data.FileData) string {
 	return content
 }
 
-pub fn generate_post_page(file_data static_data.FileData, post_id int) string {
+pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url string) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title)
+	content = content.replace('@BASEURL', base_url)
+	content = content.replace('@POSTNUMBER', post_id.str())
 
 	article_db := create_or_open_db() or { panic(err) }
 	mut articles := article_db.exec("select title, time_date, content, author from articles where id = ${post_id};") or { panic(err) }
@@ -176,6 +178,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int) string {
 		articles_body += ' '.repeat(8)
 		articles_body += '</article>\n'
 		content = content.replace('@POSTNAME', article_title)
+		content = content.replace('@BAREPOSTCONTENT', article_content)
 	}
 
 	content = content.replace('@POSTCONTENT', articles_body)
