@@ -177,8 +177,9 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 		articles_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		articles_body += ' '.repeat(8)
 		articles_body += '</article>\n'
-		content = content.replace('@POSTNAME', article_title)
-		content = content.replace('@BAREPOSTCONTENT', article_content)
+		fmt_title, fmt_content := article_title.replace('"', '&quot;'), article_content.replace('"', '&quot;')
+		content = content.replace('@POSTNAME', fmt_title)
+		content = content.replace('@BAREPOSTCONTENT', fmt_content)
 	}
 
 	content = content.replace('@POSTCONTENT', articles_body)
