@@ -213,4 +213,7 @@ a:hover {
     article img.avatar {
         display: none;
     }
+    .mobilenodisp {
+        display: none;
+    }
 }
