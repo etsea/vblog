@@ -73,6 +73,13 @@ const (
 				status: 200
 				content: $embed_file('files/style.css').to_string()
 			}
+			'/post.css': FileData{
+				page_type: .other
+				title: 'CSS Stylesheet'
+				content_type: .text_css
+				status: 200
+				content: $embed_file('files/post.css').to_string()
+			}
 			'/avatar.bmp': FileData{
 				page_type: .other
 				title: 'Author Avatar'
