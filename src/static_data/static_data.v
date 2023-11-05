@@ -42,14 +42,14 @@ const (
 		files = {
 			'/': FileData{
 				page_type: .homepage
-				title: 'Home Page'
+				title: 'home'
 				content_type: .text_html
 				status: 200
 				content: $embed_file('files/homepage.html').to_string()
 			}
 			'/all': FileData{
 				page_type: .allposts
-				title: 'All Posts'
+				title: 'all posts'
 				content_type: .text_html
 				status: 200
 				content: $embed_file('files/allposts.html').to_string()
