@@ -12,7 +12,15 @@ const (
 
 pub struct BlogHandler {}
 
+fn log_request(req Request) {
+	header_host := req.header.get(.host) or { 'UNKNOWN-HOST' }
+	header_agent := req.header.get(.user_agent) or { 'UNKNOWN USER-AGENT' }
+	println(header_agent)
+	println('\t[${header_host}] -> ${req.host}${req.url}')
+}
+
 fn (h BlogHandler) handle(req Request) Response {
+	log_request(req)
 	file_data := static_data.get_file(req.url)
 	response := match file_data.page_type {
 		.homepage {
