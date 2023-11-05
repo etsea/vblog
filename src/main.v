@@ -46,7 +46,7 @@ fn add_func(cmd Command) ! {
 
 fn serve_func(cmd Command) ! {
 	mut server := Server{
-		addr: ':80'
+		addr: ':8080'
 		handler: BlogHandler{}
 	}
 	server.listen_and_serve()
