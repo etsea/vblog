@@ -8,7 +8,7 @@ import os
 import regex
 
 const (
-	blog_title = "Blog in V"
+	blog_title = "jeffvos.dev"
 )
 
 pub struct BlogHandler {}
