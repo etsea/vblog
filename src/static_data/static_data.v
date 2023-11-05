@@ -7,6 +7,7 @@ enum ContentType {
 	image_bmp
 	image_vnd
 	font_ttf
+	text_js
 }
 
 pub enum PageType {
@@ -32,6 +33,7 @@ pub fn (ct ContentType) str() string {
 		.image_bmp { 'image/bmp' }
 		.image_vnd { 'image/vnd' }
 		.font_ttf { 'font/ttf' }
+		.text_js { 'text/javascript' }
 		else { 'text/plain' }
 	}
 }
@@ -107,6 +109,13 @@ const (
 				content_type: .text_html
 				status: 200
 				content: $embed_file('files/postpage.html').to_string()
+			}
+			'/dark_mode.js': FileData{
+				page_type: .other
+				title: 'Dark Mode Toggle'
+				content_type: .text_js
+				status: 200
+				content: $embed_file('files/dark_mode.js').to_string()
 			}
 		}
 )
