@@ -8,6 +8,7 @@ enum ContentType {
 	image_vnd
 	font_ttf
 	text_js
+	image_jpg
 }
 
 pub enum PageType {
@@ -34,6 +35,7 @@ pub fn (ct ContentType) str() string {
 		.image_vnd { 'image/vnd' }
 		.font_ttf { 'font/ttf' }
 		.text_js { 'text/javascript' }
+		.image_jpg { 'image/jpeg' }
 		else { 'text/plain' }
 	}
 }
@@ -88,6 +90,13 @@ const (
 				content_type: .image_bmp
 				status: 200
 				content: $embed_file('files/blog_avatar.bmp').to_string()
+			}
+			'/avatar.jpg': FileData{
+				page_type: .other
+				title: 'Author Avatar'
+				content_type: .image_jpg
+				status: 200
+				content: $embed_file('files/blog_avatar.jpg').to_string()
 			}
 			'/cabin.ttf': FileData{
 				page_type: .other
