@@ -72,7 +72,7 @@ fn (h BlogHandler) handle(req Request) Response {
 }
 
 fn create_or_open_db() !sqlite.DB {
-	db_file := 'articles.db'
+	db_file := '/etc/vblog/articles.db'
 	db := sqlite.connect(db_file) or {
 		eprintln('Could not connect to or create the database: ${db_file}')
 		return err
