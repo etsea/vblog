@@ -57,7 +57,7 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 		formatted_time := post_time.custom_format('h:mm A // MMM D YYYY')
 		post_title := post.vals[0]
 		post_author := post.vals[3]
-		post_content := hlp.shorten_post(post.vals[2])
+		post_content := hlp.shorten_post(post.vals[2], 255)
 		post_id := post.vals[4]
 
 		posts_body += ' '.repeat(8)
@@ -142,7 +142,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 		posts_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		posts_body += ' '.repeat(8)
 		posts_body += '</article>\n'
-		fmt_title, fmt_desc := post_title.replace('"', '&quot;'), hlp.shorten_post(post_desc.replace('"', '&quot;'))
+		fmt_title, fmt_desc := post_title.replace('"', '&quot;'), hlp.shorten_post(post_desc.replace('"', '&quot;'), 125)
 		content = content.replace('@POSTNAME', fmt_title)
 		content = content.replace('@POSTDESC', fmt_desc)
 	}

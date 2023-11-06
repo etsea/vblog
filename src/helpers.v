@@ -54,9 +54,7 @@ pub fn offset_header_tags(s string) string {
 	return conversion.str()
 }
 
-pub fn shorten_post(s string) string {
-	max_length := 255
-
+pub fn shorten_post(s string, max_length int) string {
 	if s.runes().len <= max_length {
 		return s
 	}
