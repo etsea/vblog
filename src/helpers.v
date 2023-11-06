@@ -17,15 +17,38 @@ pub fn offset_header_tags(s string) string {
 
 pub fn shorten_post(s string) string {
 	max_length := 255
-	if s.len <= max_length {
+
+	if s.runes().len <= max_length {
 		return s
 	}
 
-	for i := max_length; i >= 0; i-- {
-		if s[i] in [' '.u8(), '\t'.u8(), '\n'.u8()] { return s[..i] + '...' }
+	mut last_space_index := -1
+	for i, current_rune in s.runes() {
+		if i >= max_length {
+			break
+		}
+		if current_rune in [` `, `\t`, `\n`, `\r`] {
+			last_space_index = i
+		}
 	}
 
-	return s[..max_length] + '...'
+	if last_space_index != -1 {
+		rune_array := s.runes()[..last_space_index]
+		mut output_string := ''
+		for current_rune in rune_array {
+			output_string += current_rune.str()
+		}
+		output_string = output_string.trim_right(' \t\n\r') + '...'
+		return output_string
+	} else {
+		rune_array := s.runes()[..max_length]
+		mut output_string := ''
+		for current_rune in rune_array {
+			output_string += current_rune.str()
+		}
+		output_string = output_string + '...'
+		return output_string
+	}
 }
 
 pub fn log_request_to_stdout(req http.Request) {
