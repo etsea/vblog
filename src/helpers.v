@@ -1,5 +1,8 @@
 module helpers
 
+import regex
+import net.http
+
 pub fn shift_html_headers(s string) string {
 	mut conv := s
 	conv = conv.replace('h6>', 'p>')
@@ -24,3 +27,24 @@ pub fn shorten_post(s string) string {
 
 	return s[..max_length] + '...'
 }
+
+pub fn log_request(req http.Request) {
+	header_host := req.header.get(.host) or { 'UNKNOWN-HOST' }
+	header_agent := req.header.get(.user_agent) or { 'UNKNOWN USER-AGENT' }
+	println(header_agent)
+	println('\t[${header_host}] -> ${req.host}${req.url}')
+}
+
+pub fn check_if_post(url string) bool {
+	url_query := '^/post\\d+$'
+	re := regex.regex_opt(url_query) or { panic(err) }
+	return if re.matches_string(url) { true } else { false }
+}
+
+pub fn get_post_id(url string) int {
+	id_string := url[5..]
+	id := id_string.int()
+	return id
+}
+
+

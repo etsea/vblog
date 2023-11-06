@@ -4,7 +4,6 @@ import static_data
 import net.http { CommonHeader, Request, Response, Server }
 import db.sqlite
 import time
-import regex
 import helpers as hlp
 
 const (
@@ -13,40 +12,15 @@ const (
 
 pub struct BlogHandler {}
 
-fn log_request(req Request) {
-	header_host := req.header.get(.host) or { 'UNKNOWN-HOST' }
-	header_agent := req.header.get(.user_agent) or { 'UNKNOWN USER-AGENT' }
-	println(header_agent)
-	println('\t[${header_host}] -> ${req.host}${req.url}')
-}
-
-fn check_if_post(url string) bool {
-	url_query := '^/post\\d+$'
-	re := regex.regex_opt(url_query) or { panic(err) }
-	return if re.matches_string(url) { true } else { false }
-}
-
-fn get_post_id(url string) int {
-	id_string := url[5..]
-	id := id_string.int()
-	return id
-}
-
-fn check_if_in_db(id int) bool {
-	article_db := create_or_open_db() or { panic(err) }
-	exists := article_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
-	return if exists[0].vals[0] == '1' { true } else { false }
-}
-
 fn (h BlogHandler) handle(req Request) Response {
-	is_post := check_if_post(req.url)
+	is_post := hlp.check_if_post(req.url)
 	mut fetch_url := if is_post { '/post' } else { req.url }
-	post_id := if is_post { get_post_id(req.url) } else { 0 }
+	post_id := if is_post { hlp.get_post_id(req.url) } else { 0 }
 	if is_post {
 		fetch_url = if check_if_in_db(post_id) { fetch_url } else { '/404' }
 	}
 
-	log_request(req)
+	hlp.log_request(req)
 	file_data := static_data.get_file(fetch_url)
 	response := match file_data.page_type {
 		.homepage {
@@ -79,6 +53,12 @@ fn create_or_open_db() !sqlite.DB {
 	}
 	db.exec("create table if not exists articles (id integer primary key autoincrement, time_date datetime, title text not null, content text not null, author text not null, desc text not null);") or { panic(err) }
 	return db
+}
+
+fn check_if_in_db(id int) bool {
+	article_db := create_or_open_db() or { panic(err) }
+	exists := article_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
+	return if exists[0].vals[0] == '1' { true } else { false }
 }
 
 pub fn generate_home_page(file_data static_data.FileData) string {
