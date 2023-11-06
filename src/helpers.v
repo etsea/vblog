@@ -2,17 +2,56 @@ module helpers
 
 import regex
 import net.http
+import strings
 
 pub fn offset_header_tags(s string) string {
-	mut conv := s
-	conv = conv.replace('h6>', 'p>')
-	conv = conv.replace('h5>', 'p>')
-	conv = conv.replace('h4>', 'h6>')
-	conv = conv.replace('h3>', 'h5>')
-	conv = conv.replace('h2>', 'h4>')
-	conv = conv.replace('h1>', 'h3>')
+	mut conversion := strings.new_builder(s.len)
 
-	return conv
+	parts := s.split_any('<>')
+	mut is_tag := false
+	mut write_buffer := []u8{}
+
+	for part in parts {
+		if is_tag {
+			if part.to_lower().starts_with('h') && part.len == 2 {
+				prefix := [part[0]].bytestr()
+				check_int := [part[1]].bytestr().int()
+				mut new_header_level := ''
+				if check_int >= 1 && check_int <= 6 {
+					new_header_level = if check_int >= 5 { 'p' } else { '${prefix}${check_int + 2}' }
+				} else {
+					new_header_level = '${prefix}${check_int}'
+				}
+				conversion.write(`<`.bytes()) or { panic(err) }
+				write_buffer = new_header_level.bytes()
+				conversion.write(write_buffer) or { panic(err) }
+				conversion.write(`>`.bytes()) or { panic(err) }
+			} else if part.to_lower().starts_with('/h') && part.len == 3 {
+				prefix := [part[1]].bytestr()
+				check_int := [part[2]].bytestr().int()
+				mut new_header_level := ''
+				if check_int >= 1 && check_int <= 6 {
+					new_header_level = if check_int >= 5 { '/p' } else { '/${prefix}${check_int + 2}' }
+				} else {
+					new_header_level = '/${prefix}${check_int}'
+				}
+				conversion.write(`<`.bytes()) or { panic(err) }
+				write_buffer = new_header_level.bytes()
+				conversion.write(write_buffer) or { panic(err) }
+				conversion.write(`>`.bytes()) or { panic(err) }
+			} else {
+				write_buffer = '<${part}>'.bytes()
+				conversion.write(write_buffer) or { panic(err) }
+			}
+			is_tag = false
+		} else {
+			write_buffer = part.bytes()
+			conversion.write(write_buffer) or { panic(err) }
+			is_tag = true
+		}
+	}
+
+	return conversion.str()
 }
 
 pub fn shorten_post(s string) string {
