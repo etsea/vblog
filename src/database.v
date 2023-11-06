@@ -12,9 +12,9 @@ pub fn connect() !sqlite.DB {
 	return db
 }
 
-pub fn valid_post(id int) bool {
-	posts_db := connect() or { panic(err) }
-	exists := posts_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
-	return if exists[0].vals[0] == '1' { true } else { false }
+pub fn validate_post(id int) bool {
+	db := connect() or { panic(err) }
+	post_ref := db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
+	return if post_ref[0].vals[0] == '1' { true } else { false }
 }
 

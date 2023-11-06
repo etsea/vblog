@@ -17,7 +17,7 @@ fn (h BlogHandler) handle(req Request) Response {
 	mut fetch_url := if is_post { '/post' } else { req.url }
 	post_id := if is_post { hlp.get_post_id(req.url) } else { 0 }
 	if is_post {
-		fetch_url = if dbase.valid_post(post_id) { fetch_url } else { '/404' }
+		fetch_url = if dbase.validate_post(post_id) { fetch_url } else { '/404' }
 	}
 
 	hlp.log_request(req)
