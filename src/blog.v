@@ -47,7 +47,7 @@ fn (h BlogHandler) handle(req Request) Response {
 
 fn check_if_in_db(id int) bool {
 	posts_db := dbase.connect() or { panic(err) }
-	exists := posts_db.exec('select exists(select 1 from posts where id = ${id})') or { panic(err) }
+	exists := posts_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
 	return if exists[0].vals[0] == '1' { true } else { false }
 }
 
@@ -56,7 +56,7 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	posts_db := dbase.connect() or { panic(err) }
-	mut posts := posts_db.exec("select title, time_date, desc, author, id from posts order by id desc limit 10;") or { panic(err) }
+	mut posts := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc limit 10;") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
 		post_time := time.parse(post.vals[1]) or { panic(err) }
