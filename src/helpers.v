@@ -5,46 +5,32 @@ import strings
 
 pub fn offset_header_tags(s string) string {
 	mut conversion := strings.new_builder(s.len)
-
 	parts := s.split_any('<>')
 	mut is_tag := false
-	mut write_buffer := []u8{}
 
 	for part in parts {
 		if is_tag {
-			if part.to_lower().starts_with('h') && part.len == 2 {
-				prefix := [part[0]].bytestr()
-				check_int := [part[1]].bytestr().int()
+			htag_open := regex.regex_opt('^[Hh][1-6]') or { panic(err) }
+			htag_close := regex.regex_opt('^/[Hh][1-6]') or { panic(err) }
+			if htag_open.matches_string(part) || htag_close.matches_string(part) {
+				char_level := if htag_open.matches_string(part) { 0 } else { 1 }
+				prefix := [part[char_level]].bytestr()
+				check_int := [part[char_level + 1]].bytestr().int()
 				mut new_header_level := ''
 				if check_int >= 1 && check_int <= 6 {
 					new_header_level = if check_int >= 5 { 'p' } else { '${prefix}${check_int + 2}' }
-				} else {
-					new_header_level = '${prefix}${check_int}'
 				}
-				conversion.write(`<`.bytes()) or { panic(err) }
-				write_buffer = new_header_level.bytes()
+				new_header_level = if char_level == 1 { '/${new_header_level}' } else { new_header_level }
+				new_header_level = '<${new_header_level}>'
+				write_buffer := new_header_level.bytes()
 				conversion.write(write_buffer) or { panic(err) }
-				conversion.write(`>`.bytes()) or { panic(err) }
-			} else if part.to_lower().starts_with('/h') && part.len == 3 {
-				prefix := [part[1]].bytestr()
-				check_int := [part[2]].bytestr().int()
-				mut new_header_level := ''
-				if check_int >= 1 && check_int <= 6 {
-					new_header_level = if check_int >= 5 { '/p' } else { '/${prefix}${check_int + 2}' }
-				} else {
-					new_header_level = '/${prefix}${check_int}'
-				}
-				conversion.write(`<`.bytes()) or { panic(err) }
-				write_buffer = new_header_level.bytes()
-				conversion.write(write_buffer) or { panic(err) }
-				conversion.write(`>`.bytes()) or { panic(err) }
 			} else {
-				write_buffer = '<${part}>'.bytes()
+				write_buffer := '<${part}>'.bytes()
 				conversion.write(write_buffer) or { panic(err) }
 			}
 			is_tag = false
 		} else {
-			write_buffer = part.bytes()
+			write_buffer := part.bytes()
 			conversion.write(write_buffer) or { panic(err) }
 			is_tag = true
 		}
