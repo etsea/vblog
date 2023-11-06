@@ -126,7 +126,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 	content = content.replace('@POSTNUMBER', post_id.str())
 
 	posts_db := dbase.connect() or { panic(err) }
-	mut posts := posts_db.exec("select title, time_date, content, author from articles where id = ${post_id};") or { panic(err) }
+	mut posts := posts_db.exec("select title, time_date, content, author, desc from articles where id = ${post_id};") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
 		post_time := time.parse(post.vals[1]) or { panic(err) }
@@ -134,6 +134,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 		post_title := post.vals[0]
 		post_author := post.vals[3]
 		post_content := post.vals[2]
+		post_desc := post.vals[4]
 
 		posts_body += ' '.repeat(8)
 		posts_body += '<article>\n'
@@ -147,9 +148,9 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 		posts_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		posts_body += ' '.repeat(8)
 		posts_body += '</article>\n'
-		fmt_title, fmt_content := post_title.replace('"', '&quot;'), hlp.shorten_post(post_content.replace('"', '&quot;'))
+		fmt_title, fmt_desc := post_title.replace('"', '&quot;'), hlp.shorten_post(post_desc.replace('"', '&quot;'))
 		content = content.replace('@POSTNAME', fmt_title)
-		content = content.replace('@BAREPOSTCONTENT', fmt_content)
+		content = content.replace('@POSTDESC', fmt_desc)
 	}
 
 	content = content.replace('@POSTCONTENT', posts_body)
