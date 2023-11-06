@@ -17,7 +17,7 @@ fn main() {
 		global: true
 		name: 'db'
 		abbrev: 'd'
-		default_value: ['/etc/vblog/articles.db']
+		default_value: ['vblog']
 	}
 	app.add_flag(db_file_flag)
 

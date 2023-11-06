@@ -3,7 +3,7 @@ module database
 import db.sqlite
 import db.mysql
 
-pub fn connect(db_file string) !sqlite.DB {
+pub fn connect_file(db_file string) !sqlite.DB {
 	db := sqlite.connect(db_file) or {
 		eprintln('Could not connect to or create the database: ${db_file}')
 		return err
@@ -12,14 +12,16 @@ pub fn connect(db_file string) !sqlite.DB {
 	return db
 }
 
-pub fn connect_db(dbname string) !mysql.DB {
+pub fn connect(dbname string) !mysql.DB {
 	db_config := mysql.Config{
+		host: 'localhost'
+		port: 3306
 		username: 'vblog'
 		password: 'vblog'
 		dbname: dbname
 	}
 	db := mysql.connect(db_config) or {
-		eprintln('Could not connect to the database: ${db_config}')
+		eprintln('Could not connect to the database: ${dbname}')
 		return err
 	}
 	db.exec("CREATE TABLE IF NOT EXISTS articles (id INTEGER NOT NULL AUTO_INCREMENT, time_date DATETIME, title TEXT NOT NULL, content TEXT NOT NULL, author TEXT NOT NULL, description TEXT NOT NULL, PRIMARY KEY (id));") or { panic(err) }
