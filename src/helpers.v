@@ -89,10 +89,15 @@ pub fn shorten_post(s string, max_length int) string {
 }
 
 pub fn log_request_to_stdout(req http.Request) {
-	header_host := req.header.get(.host) or { 'UNKNOWN-HOST' }
 	header_agent := req.header.get(.user_agent) or { 'UNKNOWN USER-AGENT' }
+	x_forwarded_for := req.header.get(.x_forwarded_for) or { '' }
+	user_ip := if x_forwarded_for != '' {
+		x_forwarded_for.split(',')[0]
+	} else {
+		'UNKNOWN IP'
+	}
 	println(header_agent)
-	println('\t[${header_host}] -> ${req.host}${req.url}')
+	println('\t[${user_ip}] -> ${req.host}${req.url}')
 }
 
 pub fn check_if_post(url string) bool {
