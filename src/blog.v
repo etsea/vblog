@@ -52,7 +52,7 @@ pub fn generate_home_page(db_file string, file_data static_data.FileData) string
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	posts_db := dbase.connect(db_file) or { panic(err) }
-	mut posts := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc limit 10;") or { panic(err) }
+	mut posts := posts_db.exec("select title, time_date, description, author, id from articles order by id desc limit 10;") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
 		post_time := time.parse(post.vals[1]) or { panic(err) }
@@ -86,7 +86,7 @@ pub fn generate_all_posts_page(db_file string, file_data static_data.FileData) s
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	posts_db := dbase.connect(db_file) or { panic(err) }
-	mut posts := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc;") or { panic(err) }
+	mut posts := posts_db.exec("select title, time_date, description, author, id from articles order by id desc;") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
 		post_time := time.parse(post.vals[1]) or { panic(err) }
@@ -122,7 +122,7 @@ pub fn generate_post_page(db_file string, file_data static_data.FileData, post_i
 	content = content.replace('@POSTNUMBER', post_id.str())
 
 	posts_db := dbase.connect(db_file) or { panic(err) }
-	mut posts := posts_db.exec("select title, time_date, content, author, desc from articles where id = ${post_id};") or { panic(err) }
+	mut posts := posts_db.exec("select title, time_date, content, author, description from articles where id = ${post_id};") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
 		post_time := time.parse(post.vals[1]) or { panic(err) }
@@ -165,7 +165,7 @@ pub fn add_post(db_file string, title string, desc string, author string, conten
 	escaped_author := author.replace("'", "''")
 	escaped_desc := desc.replace("'", "''")
 
-	posts_db.exec("insert into articles (title, desc, author, time_date, content) values (\'${escaped_title}\', \'${escaped_desc}\', \'${escaped_author}\', \'${current_time}\', \'${escaped_content}\');") or {
+	posts_db.exec("insert into articles (title, description, author, time_date, content) values (\'${escaped_title}\', \'${escaped_desc}\', \'${escaped_author}\', \'${current_time}\', \'${escaped_content}\');") or {
 		eprintln('Unable to insert article into SQLITE database:')
 		eprint('Article: ${title}\nContent: ${content}\n')
 		return err

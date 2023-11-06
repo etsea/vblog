@@ -1,13 +1,28 @@
 module database
 
 import db.sqlite
+import db.mysql
 
 pub fn connect(db_file string) !sqlite.DB {
 	db := sqlite.connect(db_file) or {
 		eprintln('Could not connect to or create the database: ${db_file}')
 		return err
 	}
-	db.exec("create table if not exists articles (id integer primary key autoincrement, time_date datetime, title text not null, content text not null, author text not null, desc text not null);") or { panic(err) }
+	db.exec("create table if not exists articles (id integer primary key autoincrement, time_date datetime, title text not null, content text not null, author text not null, description text not null);") or { panic(err) }
+	return db
+}
+
+pub fn connect_db(dbname string) !mysql.DB {
+	db_config := mysql.Config{
+		username: 'vblog'
+		password: 'vblog'
+		dbname: dbname
+	}
+	db := mysql.connect(db_config) or {
+		eprintln('Could not connect to the database: ${db_config}')
+		return err
+	}
+	db.exec("CREATE TABLE IF NOT EXISTS articles (id INTEGER NOT NULL AUTO_INCREMENT, time_date DATETIME, title TEXT NOT NULL, content TEXT NOT NULL, author TEXT NOT NULL, description TEXT NOT NULL, PRIMARY KEY (id));") or { panic(err) }
 	return db
 }
 
