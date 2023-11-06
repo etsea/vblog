@@ -58,22 +58,22 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 	posts_db := dbase.connect() or { panic(err) }
 	mut posts := posts_db.exec("select title, time_date, desc, author, id from posts order by id desc limit 10;") or { panic(err) }
 	mut posts_body := ''
-	for article in posts {
-		article_time := time.parse(article.vals[1]) or { panic(err) }
-		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		article_title := article.vals[0]
-		article_author := article.vals[3]
-		article_content := hlp.shorten_post(article.vals[2])
-		post_id := article.vals[4]
+	for post in posts {
+		post_time := time.parse(post.vals[1]) or { panic(err) }
+		formatted_time := post_time.custom_format('h:mm A // MMM D YYYY')
+		post_title := post.vals[0]
+		post_author := post.vals[3]
+		post_content := hlp.shorten_post(post.vals[2])
+		post_id := post.vals[4]
 
 		posts_body += ' '.repeat(8)
 		posts_body += '<article>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<h2><a class="title" href="/post${post_id}">${article_title}</a></h2>\n'
+		posts_body += '<h2><a class="title" href="/post${post_id}">${post_title}</a></h2>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
+		posts_body += '<p class="date">${formatted_time} <span class="author">posted by ${post_author}</span></p>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<p>${article_content}</p>\n'
+		posts_body += '<p>${post_content}</p>\n'
 		posts_body += ' '.repeat(12)
 		posts_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		posts_body += ' '.repeat(8)
@@ -92,22 +92,22 @@ pub fn generate_all_posts_page(file_data static_data.FileData) string {
 	posts_db := dbase.connect() or { panic(err) }
 	mut posts := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc;") or { panic(err) }
 	mut posts_body := ''
-	for article in posts {
-		article_time := time.parse(article.vals[1]) or { panic(err) }
-		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		article_title := article.vals[0]
-		article_author := article.vals[3]
-		article_content := article.vals[2]
-		post_id := article.vals[4]
+	for post in posts {
+		post_time := time.parse(post.vals[1]) or { panic(err) }
+		formatted_time := post_time.custom_format('h:mm A // MMM D YYYY')
+		post_title := post.vals[0]
+		post_author := post.vals[3]
+		post_content := post.vals[2]
+		post_id := post.vals[4]
 
 		posts_body += ' '.repeat(8)
 		posts_body += '<article>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<h2><a class="title" href="/post${post_id}">${article_title}</a></h2>\n'
+		posts_body += '<h2><a class="title" href="/post${post_id}">${post_title}</a></h2>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
+		posts_body += '<p class="date">${formatted_time} <span class="author">posted by ${post_author}</span></p>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<p>${article_content}</p>\n'
+		posts_body += '<p>${post_content}</p>\n'
 		posts_body += ' '.repeat(12)
 		posts_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		posts_body += ' '.repeat(8)
@@ -128,26 +128,26 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 	posts_db := dbase.connect() or { panic(err) }
 	mut posts := posts_db.exec("select title, time_date, content, author from articles where id = ${post_id};") or { panic(err) }
 	mut posts_body := ''
-	for article in posts {
-		article_time := time.parse(article.vals[1]) or { panic(err) }
-		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
-		article_title := article.vals[0]
-		article_author := article.vals[3]
-		article_content := article.vals[2]
+	for post in posts {
+		post_time := time.parse(post.vals[1]) or { panic(err) }
+		formatted_time := post_time.custom_format('h:mm A // MMM D YYYY')
+		post_title := post.vals[0]
+		post_author := post.vals[3]
+		post_content := post.vals[2]
 
 		posts_body += ' '.repeat(8)
 		posts_body += '<article>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<h2>${article_title}</h2>\n'
+		posts_body += '<h2>${post_title}</h2>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<p class="date">${formatted_time} <span class="author">posted by ${article_author}</span></p>\n'
+		posts_body += '<p class="date">${formatted_time} <span class="author">posted by ${post_author}</span></p>\n'
 		posts_body += ' '.repeat(12)
-		posts_body += '<p>${article_content}</p>\n'
+		posts_body += '<p>${post_content}</p>\n'
 		posts_body += ' '.repeat(12)
 		posts_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		posts_body += ' '.repeat(8)
 		posts_body += '</article>\n'
-		fmt_title, fmt_content := article_title.replace('"', '&quot;'), hlp.shorten_post(article_content.replace('"', '&quot;'))
+		fmt_title, fmt_content := post_title.replace('"', '&quot;'), hlp.shorten_post(post_content.replace('"', '&quot;'))
 		content = content.replace('@POSTNAME', fmt_title)
 		content = content.replace('@BAREPOSTCONTENT', fmt_content)
 	}
