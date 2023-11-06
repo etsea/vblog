@@ -2,8 +2,7 @@ module database
 
 import db.sqlite
 
-pub fn connect() !sqlite.DB {
-	db_file := '/etc/vblog/articles.db'
+pub fn connect(db_file string) !sqlite.DB {
 	db := sqlite.connect(db_file) or {
 		eprintln('Could not connect to or create the database: ${db_file}')
 		return err
@@ -12,8 +11,8 @@ pub fn connect() !sqlite.DB {
 	return db
 }
 
-pub fn validate_post(id int) bool {
-	db := connect() or { panic(err) }
+pub fn validate_post(db_file string, id int) bool {
+	db := connect(db_file) or { panic(err) }
 	post_ref := db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
 	return if post_ref[0].vals[0] == '1' { true } else { false }
 }

@@ -14,6 +14,14 @@ fn main() {
 		disable_man: true
 		disable_flags: true
 	}
+	mut db_file_flag := Flag{
+		flag: .string
+		global: true
+		name: 'db'
+		abbrev: 'd'
+		default_value: ['/etc/vblog/articles.db']
+	}
+	app.add_flag(db_file_flag)
 
 	mut add_cmd := Command{
 		name: 'add'

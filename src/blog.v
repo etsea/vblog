@@ -10,26 +10,29 @@ const (
 	blog_title = "jeffvos.dev"
 )
 
-pub struct BlogHandler {}
+pub struct BlogHandler {
+	db string
+}
 
 fn (h BlogHandler) handle(req Request) Response {
+
 	is_post := hlp.check_if_post(req.url)
 	mut fetch_url := if is_post { '/post' } else { req.url }
 	post_id := if is_post { hlp.get_post_id(req.url) } else { 0 }
 	if is_post {
-		fetch_url = if dbase.validate_post(post_id) { fetch_url } else { '/404' }
+		fetch_url = if dbase.validate_post(h.db, post_id) { fetch_url } else { '/404' }
 	}
 
 	file_data := static_data.get_file(fetch_url)
 	response := match file_data.page_type {
 		.homepage {
-			generate_home_page(file_data)
+			generate_home_page(h.db, file_data)
 		}
 		.allposts {
-			generate_all_posts_page(file_data)
+			generate_all_posts_page(h.db, file_data)
 		}
 		.postpage {
-			generate_post_page(file_data, post_id, req.host)
+			generate_post_page(h.db, file_data, post_id, req.host)
 		}
 		else { file_data.content }
 	}
@@ -44,11 +47,11 @@ fn (h BlogHandler) handle(req Request) Response {
 	return res
 }
 
-pub fn generate_home_page(file_data static_data.FileData) string {
+pub fn generate_home_page(db_file string, file_data static_data.FileData) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
-	posts_db := dbase.connect() or { panic(err) }
+	posts_db := dbase.connect(db_file) or { panic(err) }
 	mut posts := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc limit 10;") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
@@ -78,11 +81,11 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 	return content
 }
 
-pub fn generate_all_posts_page(file_data static_data.FileData) string {
+pub fn generate_all_posts_page(db_file string, file_data static_data.FileData) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
-	posts_db := dbase.connect() or { panic(err) }
+	posts_db := dbase.connect(db_file) or { panic(err) }
 	mut posts := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc;") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
@@ -112,13 +115,13 @@ pub fn generate_all_posts_page(file_data static_data.FileData) string {
 	return content
 }
 
-pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url string) string {
+pub fn generate_post_page(db_file string, file_data static_data.FileData, post_id int, base_url string) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title)
 	content = content.replace('@BASEURL', base_url)
 	content = content.replace('@POSTNUMBER', post_id.str())
 
-	posts_db := dbase.connect() or { panic(err) }
+	posts_db := dbase.connect(db_file) or { panic(err) }
 	mut posts := posts_db.exec("select title, time_date, content, author, desc from articles where id = ${post_id};") or { panic(err) }
 	mut posts_body := ''
 	for post in posts {
@@ -151,8 +154,8 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 	return content
 }
 
-pub fn add_post(title string, desc string, author string, content string) ! {
-	posts_db := dbase.connect() or {
+pub fn add_post(db_file string, title string, desc string, author string, content string) ! {
+	posts_db := dbase.connect(db_file) or {
 		eprintln('Unable to open or create SQLITE database.')
 		return err
 	}

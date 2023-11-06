@@ -10,18 +10,20 @@ import term
 import markdown
 
 pub fn post_create(cmd Command) ! {
+	db_file := cmd.flags.get_string('db') or { panic(err) }
 	title := cmd.args[0]
 	desc := cmd.args[1]
 	author := cmd.args[2]
 	content := cmd.args[3]
 
-	blog.add_post(title, desc, author, content) or {
+	blog.add_post(db_file, title, desc, author, content) or {
 		eprintln('Failed to add post: ${err}')
 		return err
 	}
 }
 
 pub fn parse_posts_file(cmd Command) ! {
+	db_file := cmd.flags.get_string('db') or { panic(err) }
 	file_path := cmd.args[0]
 	lines := os.read_lines(file_path) or {
 		eprintln('Unable to open or parse file: ${file_path}')
@@ -40,7 +42,7 @@ pub fn parse_posts_file(cmd Command) ! {
 			continue
 		} else {
 			title, desc, author, content := data[0], data[1], data[2], data[3]
-			blog.add_post(title, desc, author, content) or {
+			blog.add_post(db_file, title, desc, author, content) or {
 				eprintln('Unable to add article: ${title} by ${author}: ${desc}')
 				continue
 			}
@@ -49,6 +51,7 @@ pub fn parse_posts_file(cmd Command) ! {
 }
 
 pub fn long_post_create(cmd Command) ! {
+	db_file := cmd.flags.get_string('db') or { panic(err) }
 	post_title := os.input('Enter post title: ')
 	post_author := os.input('Enter author name: ')
 	short_desc := os.input('Enter a short description: ')
@@ -86,7 +89,7 @@ pub fn long_post_create(cmd Command) ! {
 	mut verify := os.input_opt('Publish post? [y/N] ') or { 'N' }
 	verify = verify[0].ascii_str().to_lower()
 	if verify == 'y' {
-		blog.add_post(post_title, short_desc, post_author, html_content) or { panic(err) }
+		blog.add_post(db_file, post_title, short_desc, post_author, html_content) or { panic(err) }
 	} else {
 		println('Post aborted!')
 	}
@@ -95,11 +98,12 @@ pub fn long_post_create(cmd Command) ! {
 }
 
 pub fn start_server(cmd Command) ! {
+	db_file := cmd.flags.get_string('db') or { panic(err) }
 	host := cmd.flags.get_string('host') or { panic(err) }
 	port := cmd.flags.get_int('port') or { panic(err) }
 	mut server := Server{
 		addr: '${host}:${port}'
-		handler: BlogHandler{}
+		handler: BlogHandler{ db: db_file }
 	}
 	server.listen_and_serve()
 }
