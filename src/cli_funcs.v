@@ -95,8 +95,10 @@ pub fn long_post_create(cmd Command) ! {
 }
 
 pub fn start_server(cmd Command) ! {
+	host := cmd.flags.get_string('host') or { panic(err) }
+	port := cmd.flags.get_int('port') or { panic(err) }
 	mut server := Server{
-		addr: '127.0.0.1:8080'
+		addr: '${host}:${port}'
 		handler: BlogHandler{}
 	}
 	server.listen_and_serve()
