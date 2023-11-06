@@ -138,6 +138,13 @@ article h2 {
     color: var(--color-love);
 }
 
+h3 {
+    margin: 15px 0;
+    border-bottom: 1px solid var(--color-iris);
+    color: var(--color-iris);
+}
+
+
 p.date {
     position: relative;
     color: var(--color-gold);
