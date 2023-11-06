@@ -126,7 +126,7 @@ pub fn export_posts(cmd Command) ! {
 		line_desc := post.vals[1].replace('\n', '')
 		line_author := post.vals[2].replace('\n', '')
 		line_content := post.vals[3].replace('\n', '')
-		lines += '${line_title}::${line_desc}::${line_author}..${line_content}\n'
+		lines += '${line_title}::${line_desc}::${line_author}::${line_content}\n'
 	}
 	os.write_file(destination, lines) or { panic(err) }
 }
