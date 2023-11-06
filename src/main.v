@@ -9,8 +9,8 @@ import cli { Command, Flag }
 fn main() {
 	mut app := Command{
 		name: 'vblog'
-		description: 'microblog in V'
-		version: '0.0.1'
+		description: 'blog in V'
+		version: '0.1.0'
 		disable_man: true
 		disable_flags: true
 	}
