@@ -154,6 +154,10 @@ p.date {
     margin-bottom: 25px;
 }
 
+ul, ol {
+    margin: 1em 15px;
+}
+
 .author {
     color: var(--color-muted);
     font-style: italic;
