@@ -30,13 +30,14 @@ fn test_offset_header_empty_string() {
 }
 
 // Test case sensitive substitution
+// Also test <hr> tag for similarity to header
 fn test_offset_header_case_sensitivity() {
     input := '<H1>Title</H1><h2>Subtitle</h2><hr>'
     expected := '<H3>Title</H3><h4>Subtitle</h4><hr>' // Assuming function should handle case sensitivity
     assert helpers.offset_header_tags(input) == expected
 }
 
-// Add any additional test cases as needed
+
 
 
 // Testing helpers.shorten_post()
