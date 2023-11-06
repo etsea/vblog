@@ -122,7 +122,11 @@ pub fn export_posts(cmd Command) ! {
 	mut posts := db.exec('select title, desc, author, content from articles') or { panic(err) }
 	mut lines := ''
 	for post in posts {
-		lines += '${post.vals[0]}::${post.vals[1]}::${post.vals[2]}::${post.vals[3]}\n'
+		line_title := post.vals[0].replace('\n', '')
+		line_desc := post.vals[1].replace('\n', '')
+		line_author := post.vals[2].replace('\n', '')
+		line_content := post.vals[3].replace('\n', '')
+		lines += '${line_title}::${line_desc}::${line_author}..${line_content}\n'
 	}
 	os.write_file(destination, lines) or { panic(err) }
 }
