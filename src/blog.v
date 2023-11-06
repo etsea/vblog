@@ -6,6 +6,7 @@ import db.sqlite
 import time
 import os
 import regex
+import helpers as hlp
 
 const (
 	blog_title = "jeffvos.dev"
@@ -81,19 +82,6 @@ fn create_or_open_db() !sqlite.DB {
 	return db
 }
 
-fn shorten_article(s string) string {
-	max_length := 255
-	if s.len <= max_length {
-		return s
-	}
-
-	for i := max_length; i >= 0; i-- {
-		if s[i] in [' '.u8(), '\t'.u8(), '\n'.u8()] { return s[..i] + '...' }
-	}
-
-	return s[..max_length] + '...'
-}
-
 pub fn generate_home_page(file_data static_data.FileData) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
@@ -106,7 +94,7 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 		formatted_time := article_time.custom_format('h:mm A // MMM D YYYY')
 		article_title := article.vals[0]
 		article_author := article.vals[3]
-		article_content := shorten_article(article.vals[2])
+		article_content := hlp.shorten_post(article.vals[2])
 		post_id := article.vals[4]
 
 		articles_body += ' '.repeat(8)
@@ -190,7 +178,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 		articles_body += '<img src="avatar.bmp" alt="Author Avatar" class="avatar">\n'
 		articles_body += ' '.repeat(8)
 		articles_body += '</article>\n'
-		fmt_title, fmt_content := article_title.replace('"', '&quot;'), shorten_article(article_content.replace('"', '&quot;'))
+		fmt_title, fmt_content := article_title.replace('"', '&quot;'), hlp.shorten_post(article_content.replace('"', '&quot;'))
 		content = content.replace('@POSTNAME', fmt_title)
 		content = content.replace('@BAREPOSTCONTENT', fmt_content)
 	}
