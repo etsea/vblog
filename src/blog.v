@@ -20,7 +20,6 @@ fn (h BlogHandler) handle(req Request) Response {
 		fetch_url = if dbase.validate_post(post_id) { fetch_url } else { '/404' }
 	}
 
-	hlp.log_request_to_stdout(req)
 	file_data := static_data.get_file(fetch_url)
 	response := match file_data.page_type {
 		.homepage {
