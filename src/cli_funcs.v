@@ -113,8 +113,12 @@ pub fn export_posts(cmd Command) ! {
 	db_file := cmd.flags.get_string('db') or { panic(err) }
 	db := dbase.connect(db_file) or { panic(err) }
 	mut destination := os.getwd() + if os.user_os() == 'windows' { '\\' } else { '/' }
+	check := destination
 	destination += os.input('Destination: ${destination}')
-	if destination == os.getwd() { destination += 'exported_posts.txt' }
+	if destination == check {
+		destination += 'exported_posts.txt'
+		println('Saving to: ${destination}')
+	}
 	mut posts := db.exec('select title, desc, author, content from articles') or { panic(err) }
 	mut lines := ''
 	for post in posts {
