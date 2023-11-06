@@ -2,6 +2,43 @@ module tests
 
 import helpers
 
+// Testing helpers.offset_header_tags()
+
+// Basic substitution test
+fn test_offset_header_basic() {
+    input := '<h1>Title</h1><h2>Subtitle</h2><h3>Section</h3><h4>Subsection</h4><h5>Part</h5><h6>Paragraph</h6>'
+    expected := '<h3>Title</h3><h4>Subtitle</h4><h5>Section</h5><h6>Subsection</h6><p>Part</p><p>Paragraph</p>'
+    assert helpers.offset_header_tags(input) == expected
+}
+
+// Test without any tags
+fn test_offset_header_no_headers() {
+    input := 'This is a paragraph without headers.'
+    assert helpers.offset_header_tags(input) == input
+}
+
+// Test mixed tag input
+fn test_offset_header_mixed_content() {
+    input := '<h1>Title</h1><p>Paragraph</p><h2>Subtitle</h2>'
+    expected := '<h3>Title</h3><p>Paragraph</p><h4>Subtitle</h4>'
+    assert helpers.offset_header_tags(input) == expected
+}
+
+// Test empty input
+fn test_offset_header_empty_string() {
+    assert helpers.offset_header_tags('') == ''
+}
+
+// Test case sensitive substitution
+fn test_offset_header_case_sensitivity() {
+    input := '<H1>Title</H1><h2>Subtitle</h2>'
+    expected := '<H3>Title</H3><h4>Subtitle</h4>' // Assuming function should handle case sensitivity
+    assert helpers.offset_header_tags(input) == expected
+}
+
+// Add any additional test cases as needed
+
+
 // Testing helpers.shorten_post()
 
 // Test that a string less than 255 chars long
