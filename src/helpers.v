@@ -1,7 +1,6 @@
 module helpers
 
 import regex
-import net.http
 import strings
 
 pub fn offset_header_tags(s string) string {
