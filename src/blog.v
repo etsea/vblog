@@ -156,7 +156,7 @@ pub fn generate_post_page(dbname string, file_data static_data.FileData, post_id
 
 pub fn add_post(dbname string, title string, desc string, author string, content string) ! {
 	posts_db := dbase.connect(dbname) or {
-		eprintln('Unable to open or create SQLITE database.')
+		eprintln('Unable to open SQL database.')
 		return err
 	}
 	current_time := time.now().format_ss()
@@ -166,7 +166,7 @@ pub fn add_post(dbname string, title string, desc string, author string, content
 	escaped_desc := desc.replace("'", "''")
 
 	posts_db.exec("insert into articles (title, description, author, time_date, content) values (\'${escaped_title}\', \'${escaped_desc}\', \'${escaped_author}\', \'${current_time}\', \'${escaped_content}\');") or {
-		eprintln('Unable to insert article into SQLITE database:')
+		eprintln('Unable to insert article into SQL database:')
 		eprint('Article: ${title}\nContent: ${content}\n')
 		return err
 	}
