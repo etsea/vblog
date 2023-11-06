@@ -17,7 +17,7 @@ fn (h BlogHandler) handle(req Request) Response {
 	mut fetch_url := if is_post { '/post' } else { req.url }
 	post_id := if is_post { hlp.get_post_id(req.url) } else { 0 }
 	if is_post {
-		fetch_url = if check_if_in_db(post_id) { fetch_url } else { '/404' }
+		fetch_url = if dbase.valid_post(post_id) { fetch_url } else { '/404' }
 	}
 
 	hlp.log_request(req)
@@ -43,12 +43,6 @@ fn (h BlogHandler) handle(req Request) Response {
 		body: response
 	}
 	return res
-}
-
-fn check_if_in_db(id int) bool {
-	posts_db := dbase.connect() or { panic(err) }
-	exists := posts_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
-	return if exists[0].vals[0] == '1' { true } else { false }
 }
 
 pub fn generate_home_page(file_data static_data.FileData) string {
