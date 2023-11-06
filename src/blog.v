@@ -151,7 +151,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 	return content
 }
 
-pub fn add_article(title string, desc string, author string, content string) ! {
+pub fn add_post(title string, desc string, author string, content string) ! {
 	posts_db := dbase.connect() or {
 		eprintln('Unable to open or create SQLITE database.')
 		return err

@@ -10,11 +10,15 @@ import term
 import markdown
 
 pub fn post_create(cmd Command) ! {
-	new_title := cmd.args[0]
-	new_desc := cmd.args[1]
-	new_author := cmd.args[2]
-	new_content := cmd.args[3]
-	blog.add_article(new_title, new_desc, new_author, new_content) or { panic(err) }
+	title := cmd.args[0]
+	desc := cmd.args[1]
+	author := cmd.args[2]
+	content := cmd.args[3]
+
+	blog.add_post(title, desc, author, content) or {
+		eprintln('Failed to add post: ${err}')
+		return err
+	}
 }
 
 pub fn parse_posts_file(cmd Command) ! {
@@ -36,7 +40,7 @@ pub fn parse_posts_file(cmd Command) ! {
 			continue
 		} else {
 			title, desc, author, content := data[0], data[1], data[2], data[3]
-			blog.add_article(title, desc, author, content) or {
+			blog.add_post(title, desc, author, content) or {
 				eprintln('Unable to add article: ${title} by ${author}: ${desc}')
 				continue
 			}
@@ -82,7 +86,7 @@ pub fn long_post_create(cmd Command) ! {
 	mut verify := os.input_opt('Publish post? [y/N] ') or { 'N' }
 	verify = verify[0].ascii_str().to_lower()
 	if verify == 'y' {
-		blog.add_article(post_title, short_desc, post_author, html_content) or { panic(err) }
+		blog.add_post(post_title, short_desc, post_author, html_content) or { panic(err) }
 	} else {
 		println('Post aborted!')
 	}
