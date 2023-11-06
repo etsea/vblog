@@ -1,8 +1,6 @@
 module main
 
-import blog { BlogHandler }
 import cli_funcs
-import net.http { Server }
 import os
 import cli { Command, Flag }
 
