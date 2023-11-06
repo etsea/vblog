@@ -45,14 +45,14 @@ fn test_offset_header_case_sensitivity() {
 // will be returned unchanged
 fn test_shorten_post_short_string() {
 	input := 'This is a short string'
-	assert helpers.shorten_post(input) == input
+	assert helpers.shorten_post(input, 255) == input
 }
 
 // Test that a string exactly 255 chars long
 // will be returned unchanged
 fn test_shorten_post_exactly_255_chars() {
 	input := 'a'.repeat(255)
-	assert helpers.shorten_post(input) == input
+	assert helpers.shorten_post(input, 255) == input
 }
 
 // Test that a string with no space but longer
@@ -61,7 +61,7 @@ fn test_shorten_post_exactly_255_chars() {
 fn test_shorten_post_long_no_space() {
 	input := 'a'.repeat(256)
 	expected := 'a'.repeat(255) + '...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
 
 // Test that a string with spaces and longer
@@ -71,28 +71,28 @@ fn test_shorten_post_long_no_space() {
 fn test_shorten_post_long_with_space() {
 	input := 'word '.repeat(52)
 	expected := 'word '.repeat(50) + 'word...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
 
 // Same as last test, but using \t instead of space
 fn test_shorten_post_long_with_tab() {
 	input := 'word\t'.repeat(52)
 	expected := 'word\t'.repeat(50) + 'word...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
 
 // Same as last test, but using \n instead of \t
 fn test_shorten_post_long_with_newline() {
 	input := 'word\n'.repeat(52)
 	expected := 'word\n'.repeat(50) + 'word...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
 
 // Same as last test, but using \r instead of \n
 fn test_shorten_post_long_with_carriage_return() {
 	input := 'word\r'.repeat(52)
 	expected := 'word\r'.repeat(50) + 'word...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
 
 // Test that a string with utf8 multibyte chars
@@ -100,7 +100,7 @@ fn test_shorten_post_long_with_carriage_return() {
 fn test_shorten_post_utf8_no_spaces() {
 	input := 'ä'.repeat(300)
 	expected := 'ä'.repeat(255) + '...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
 
 // Test that a string containing utf8 multibyte chars
@@ -108,5 +108,5 @@ fn test_shorten_post_utf8_no_spaces() {
 fn test_shorten_post_utf8_spaces() {
 	input := 'äé\täé '.repeat(26)
 	expected := 'äé\täé '.repeat(25) + 'äé...'
-	assert helpers.shorten_post(input) == expected
+	assert helpers.shorten_post(input, 255) == expected
 }
