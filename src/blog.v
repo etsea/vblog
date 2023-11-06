@@ -4,7 +4,6 @@ import static_data
 import net.http { CommonHeader, Request, Response, Server }
 import db.sqlite
 import time
-import os
 import regex
 import helpers as hlp
 
@@ -206,28 +205,3 @@ pub fn add_article(title string, desc string, author string, content string) ! {
 	}
 }
 
-pub fn parse_articles(file_path string) ! {
-	lines := os.read_lines(file_path) or {
-		eprintln('Unable to open or parse file: ${file_path}')
-		eprintln('Format:\nTITLE::DESC::AUTHOR::CONTENT')
-		return err
-	}
-
-	for line in lines {
-		data := line.split('::')
-		if data.len != 4 {
-			eprintln('Invalid entry; skipping:')
-			for datum in data {
-				println(datum)
-			}
-			println('\n')
-			continue
-		} else {
-			title, desc, author, content := data[0], data[1], data[2], data[3]
-			add_article(title, desc, author, content) or {
-				eprintln('Unable to add article: ${title} by ${author}: ${desc}')
-				continue
-			}
-		}
-	}
-}

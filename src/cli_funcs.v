@@ -18,7 +18,30 @@ pub fn post_create(cmd Command) ! {
 }
 
 pub fn parse_posts_file(cmd Command) ! {
-	blog.parse_articles(cmd.args[0]) or { panic(err) }
+	file_path := cmd.args[0]
+	lines := os.read_lines(file_path) or {
+		eprintln('Unable to open or parse file: ${file_path}')
+		eprintln('Format:\nTITLE::DESC::AUTHOR::CONTENT')
+		return err
+	}
+
+	for line in lines {
+		data := line.split('::')
+		if data.len != 4 {
+			eprintln('Invalid entry; skipping:')
+			for datum in data {
+				println(datum)
+			}
+			println('\n')
+			continue
+		} else {
+			title, desc, author, content := data[0], data[1], data[2], data[3]
+			blog.add_article(title, desc, author, content) or {
+				eprintln('Unable to add article: ${title} by ${author}: ${desc}')
+				continue
+			}
+		}
+	}
 }
 
 pub fn long_post_create(cmd Command) ! {
