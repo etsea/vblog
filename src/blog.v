@@ -174,4 +174,3 @@ pub fn add_article(title string, desc string, author string, content string) ! {
 		return err
 	}
 }
-
