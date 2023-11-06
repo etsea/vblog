@@ -19,8 +19,8 @@ fn main() {
 	mut add_cmd := Command{
 		name: 'add'
 		description: 'Add a new article'
-		usage: '[title] [content] [author]'
-		required_args: 2
+		usage: '[title] [desc] [author] [content]'
+		required_args: 4
 		execute: add_func
 	}
 	mut serve_cmd := Command{
@@ -47,9 +47,10 @@ fn main() {
 
 fn add_func(cmd Command) ! {
 	new_title := cmd.args[0]
-	new_content := cmd.args[1]
+	new_desc := cmd.args[1]
 	new_author := cmd.args[2]
-	blog.add_article(new_title, new_content, new_author) or { panic(err) }
+	new_content := cmd.args[3]
+	blog.add_article(new_title, new_desc, new_author, new_content) or { panic(err) }
 }
 
 fn serve_func(cmd Command) ! {
@@ -79,6 +80,7 @@ fn shift_headers(s string) string {
 fn long_func(cmd Command) ! {
 	post_title := os.input('Enter post title: ')
 	post_author := os.input('Enter author name: ')
+	short_desc := os.input('Enter a short description: ')
 
 	mut editor := os.getenv('EDITOR')
 	if editor == '' { editor = 'nvim' }
@@ -106,13 +108,14 @@ fn long_func(cmd Command) ! {
 
 	println(term_sep)
 	println('POST TITLE: ${post_title}')
-	println('        BY: ${post_author}\n')
+	println('        BY: ${post_author}')
+	println(term_sep)
 	println(content)
 	println(term_sep + '\n')
-	mut verify := os.input_opt('Send post to DB? [y/N] ') or { 'N' }
+	mut verify := os.input_opt('Publish post? [y/N] ') or { 'N' }
 	verify = verify[0].ascii_str().to_lower()
 	if verify == 'y' {
-		blog.add_article(post_title, html_content, post_author) or { panic(err) }
+		blog.add_article(post_title, short_desc, post_author, html_content) or { panic(err) }
 	} else {
 		println('Post aborted!')
 	}

@@ -77,7 +77,7 @@ fn create_or_open_db() !sqlite.DB {
 		eprintln('Could not connect to or create the database: ${db_file}')
 		return err
 	}
-	db.exec("create table if not exists articles (id integer primary key autoincrement, time_date datetime, title text not null, content text not null, author text not null);") or { panic(err) }
+	db.exec("create table if not exists articles (id integer primary key autoincrement, time_date datetime, title text not null, content text not null, author text not null, desc text not null);") or { panic(err) }
 	return db
 }
 
@@ -99,7 +99,7 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, content, author, id from articles order by id desc limit 10;") or { panic(err) }
+	mut articles := article_db.exec("select title, time_date, desc, author, id from articles order by id desc limit 10;") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -133,7 +133,7 @@ pub fn generate_all_posts(file_data static_data.FileData) string {
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
 	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, content, author, id from articles order by id desc;") or { panic(err) }
+	mut articles := article_db.exec("select title, time_date, desc, author, id from articles order by id desc;") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -200,7 +200,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 	return content
 }
 
-pub fn add_article(title string, content string, author string) ! {
+pub fn add_article(title string, desc string, author string, content string) ! {
 	article_db := create_or_open_db() or {
 		eprintln('Unable to open or create SQLITE database.')
 		return err
@@ -209,8 +209,9 @@ pub fn add_article(title string, content string, author string) ! {
 	escaped_title := title.replace("'", "''")
 	escaped_content := content.replace("'", "''")
 	escaped_author := author.replace("'", "''")
+	escaped_desc := desc.replace("'", "''")
 
-	article_db.exec("insert into articles (title, time_date, content, author) values (\'${escaped_title}\', \'${current_time}\', \'${escaped_content}\', \'${escaped_author}\');") or {
+	article_db.exec("insert into articles (title, desc, author, time_date, content) values (\'${escaped_title}\', \'${escaped_desc}\', \'${escaped_author}\', \'${current_time}\', \'${escaped_content}\');") or {
 		eprintln('Unable to insert article into SQLITE database:')
 		eprint('Article: ${title}\nContent: ${content}\n')
 		return err
@@ -220,17 +221,23 @@ pub fn add_article(title string, content string, author string) ! {
 pub fn parse_articles(file_path string) ! {
 	lines := os.read_lines(file_path) or {
 		eprintln('Unable to open or parse file: ${file_path}')
+		eprintln('Format:\nTITLE::DESC::AUTHOR::CONTENT')
 		return err
 	}
 
 	for line in lines {
 		data := line.split('::')
-		if data.len != 3 {
-			eprintln('Invalid entry; skipping: ${data}')
+		if data.len != 4 {
+			eprintln('Invalid entry; skipping:')
+			for datum in data {
+				println(datum)
+			}
+			println('\n')
 			continue
 		} else {
-			add_article(data[0], data[1], data[2]) or {
-				eprintln('Unable to add article: ${data[0]} by ${data[2]}: ${data[1]}')
+			title, desc, author, content := data[0], data[1], data[2], data[3]
+			add_article(title, desc, author, content) or {
+				eprintln('Unable to add article: ${title} by ${author}: ${desc}')
 				continue
 			}
 		}
