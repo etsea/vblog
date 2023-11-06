@@ -28,7 +28,7 @@ pub fn shorten_post(s string) string {
 	return s[..max_length] + '...'
 }
 
-pub fn log_request(req http.Request) {
+pub fn log_request_to_stdout(req http.Request) {
 	header_host := req.header.get(.host) or { 'UNKNOWN-HOST' }
 	header_agent := req.header.get(.user_agent) or { 'UNKNOWN USER-AGENT' }
 	println(header_agent)
