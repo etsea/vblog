@@ -2,7 +2,7 @@ module blog
 
 import static_data
 import net.http { CommonHeader, Request, Response, Server }
-import db.sqlite
+import database as dbase
 import time
 import helpers as hlp
 
@@ -45,19 +45,9 @@ fn (h BlogHandler) handle(req Request) Response {
 	return res
 }
 
-fn create_or_open_db() !sqlite.DB {
-	db_file := '/etc/vblog/articles.db'
-	db := sqlite.connect(db_file) or {
-		eprintln('Could not connect to or create the database: ${db_file}')
-		return err
-	}
-	db.exec("create table if not exists articles (id integer primary key autoincrement, time_date datetime, title text not null, content text not null, author text not null, desc text not null);") or { panic(err) }
-	return db
-}
-
 fn check_if_in_db(id int) bool {
-	article_db := create_or_open_db() or { panic(err) }
-	exists := article_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
+	posts_db := dbase.connect() or { panic(err) }
+	exists := posts_db.exec('select exists(select 1 from articles where id = ${id})') or { panic(err) }
 	return if exists[0].vals[0] == '1' { true } else { false }
 }
 
@@ -65,8 +55,8 @@ pub fn generate_home_page(file_data static_data.FileData) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
-	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, desc, author, id from articles order by id desc limit 10;") or { panic(err) }
+	posts_db := dbase.connect() or { panic(err) }
+	mut articles := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc limit 10;") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -99,8 +89,8 @@ pub fn generate_all_posts(file_data static_data.FileData) string {
 	mut content := file_data.content
 	content = content.replace('@BLOGTITLE', blog_title).replace('@PAGETITLE', file_data.title)
 
-	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, desc, author, id from articles order by id desc;") or { panic(err) }
+	posts_db := dbase.connect() or { panic(err) }
+	mut articles := posts_db.exec("select title, time_date, desc, author, id from articles order by id desc;") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -135,8 +125,8 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 	content = content.replace('@BASEURL', base_url)
 	content = content.replace('@POSTNUMBER', post_id.str())
 
-	article_db := create_or_open_db() or { panic(err) }
-	mut articles := article_db.exec("select title, time_date, content, author from articles where id = ${post_id};") or { panic(err) }
+	posts_db := dbase.connect() or { panic(err) }
+	mut articles := posts_db.exec("select title, time_date, content, author from articles where id = ${post_id};") or { panic(err) }
 	mut articles_body := ''
 	for article in articles {
 		article_time := time.parse(article.vals[1]) or { panic(err) }
@@ -168,7 +158,7 @@ pub fn generate_post_page(file_data static_data.FileData, post_id int, base_url 
 }
 
 pub fn add_article(title string, desc string, author string, content string) ! {
-	article_db := create_or_open_db() or {
+	posts_db := dbase.connect() or {
 		eprintln('Unable to open or create SQLITE database.')
 		return err
 	}
@@ -178,7 +168,7 @@ pub fn add_article(title string, desc string, author string, content string) ! {
 	escaped_author := author.replace("'", "''")
 	escaped_desc := desc.replace("'", "''")
 
-	article_db.exec("insert into articles (title, desc, author, time_date, content) values (\'${escaped_title}\', \'${escaped_desc}\', \'${escaped_author}\', \'${current_time}\', \'${escaped_content}\');") or {
+	posts_db.exec("insert into articles (title, desc, author, time_date, content) values (\'${escaped_title}\', \'${escaped_desc}\', \'${escaped_author}\', \'${current_time}\', \'${escaped_content}\');") or {
 		eprintln('Unable to insert article into SQLITE database:')
 		eprint('Article: ${title}\nContent: ${content}\n')
 		return err
