@@ -64,7 +64,13 @@ fn main() {
 		execute: cli_funcs.long_post_create
 	}
 
-	app.add_commands([add_cmd, server_cmd, parse_cmd, long_cmd])
+	mut export_cmd := Command{
+		name: 'export'
+		description: 'Export all existing posts to a compatible text file'
+		execute: cli_funcs.export_posts
+	}
+
+	app.add_commands([add_cmd, server_cmd, parse_cmd, long_cmd, export_cmd])
 	app.setup()
 	app.parse(os.args)
 }

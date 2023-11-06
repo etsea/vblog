@@ -8,6 +8,7 @@ import os
 import time
 import term
 import markdown
+import database as dbase
 
 pub fn post_create(cmd Command) ! {
 	db_file := cmd.flags.get_string('db') or { panic(err) }
@@ -106,4 +107,18 @@ pub fn start_server(cmd Command) ! {
 		handler: BlogHandler{ db: db_file }
 	}
 	server.listen_and_serve()
+}
+
+pub fn export_posts(cmd Command) ! {
+	db_file := cmd.flags.get_string('db') or { panic(err) }
+	db := dbase.connect(db_file) or { panic(err) }
+	mut destination := os.getwd() + if os.user_os() == 'windows' { '\\' } else { '/' }
+	destination += os.input('Destination: ${destination}')
+	if destination == os.getwd() { destination += 'exported_posts.txt' }
+	mut posts := db.exec('select title, desc, author, content from articles') or { panic(err) }
+	mut lines := ''
+	for post in posts {
+		lines += '${post.vals[0]}::${post.vals[1]}::${post.vals[2]}::${post.vals[3]}\n'
+	}
+	os.write_file(destination, lines) or { panic(err) }
 }
