@@ -3,7 +3,7 @@ module helpers
 import regex
 import net.http
 
-pub fn shift_html_headers(s string) string {
+pub fn offset_header_tags(s string) string {
 	mut conv := s
 	conv = conv.replace('h6>', 'p>')
 	conv = conv.replace('h5>', 'p>')

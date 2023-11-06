@@ -67,7 +67,7 @@ pub fn long_post_create(cmd Command) ! {
 		}
 		content = content.trim_space()
 		html_content = markdown.to_html(content)
-		html_content = hlp.shift_html_headers(html_content)
+		html_content = hlp.offset_header_tags(html_content)
 	}
 
 	width, _ := term.get_terminal_size()
