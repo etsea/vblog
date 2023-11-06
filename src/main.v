@@ -7,6 +7,7 @@ import time
 import cli { Command }
 import term
 import markdown
+import helpers as hlp
 
 fn main() {
 	mut app := Command{
@@ -65,18 +66,6 @@ fn parse_func(cmd Command) ! {
 	blog.parse_articles(cmd.args[0]) or { panic(err) }
 }
 
-fn shift_headers(s string) string {
-	mut conv := s
-	conv = conv.replace('h6>', 'p>')
-	conv = conv.replace('h5>', 'p>')
-	conv = conv.replace('h4>', 'h6>')
-	conv = conv.replace('h3>', 'h5>')
-	conv = conv.replace('h2>', 'h4>')
-	conv = conv.replace('h1>', 'h3>')
-
-	return conv
-}
-
 fn long_func(cmd Command) ! {
 	post_title := os.input('Enter post title: ')
 	post_author := os.input('Enter author name: ')
@@ -100,7 +89,7 @@ fn long_func(cmd Command) ! {
 		}
 		content = content.trim_space()
 		html_content = markdown.to_html(content)
-		html_content = shift_headers(html_content)
+		html_content = hlp.shift_html_headers(html_content)
 	}
 
 	width, _ := term.get_terminal_size()
